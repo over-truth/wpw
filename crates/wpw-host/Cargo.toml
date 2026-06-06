@@ -1,0 +1,20 @@
+[package]
+name = "wpw-host"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "wpw-host"
+path = "src/main.rs"
+
+[dependencies]
+wpw-core = { path = "../wpw-core" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+dirs = "6"
+zeroize = { version = "1", features = ["derive"] }
+secrecy = "0.10"
+uuid = "1"
+time = { version = "0.3", features = ["serde"] }
+rand = "0.8"

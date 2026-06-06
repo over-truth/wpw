@@ -1,0 +1,21 @@
+[package]
+name = "wpw-core"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+argon2 = { version = "0.5", features = ["std"] }
+aes-gcm = "0.10"
+rand = "0.8"
+getrandom = "0.2"
+zeroize = { version = "1", features = ["derive"] }
+secrecy = "0.10"
+serde = { version = "1", features = ["derive"] }
+rmp-serde = "1"
+totp-rs = { version = "5", features = ["gen_secret"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+time = { version = "0.3", features = ["serde", "formatting", "parsing"] }
+thiserror = "2"
+
+[dev-dependencies]
+tempfile = "3"

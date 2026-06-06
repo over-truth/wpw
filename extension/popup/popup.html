@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WPW 密码管理器</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>WPW</h1>
+      <div class="header-actions">
+        <button id="captureBtn" class="icon-btn" title="保存当前页面密码">➕</button>
+        <button id="lockBtn" class="icon-btn" title="锁定">🔒</button>
+      </div>
+    </header>
+    
+    <!-- Status: Not Connected -->
+    <div id="notConnected" class="view hidden">
+      <p class="message">无法连接到 WPW 服务</p>
+      <p class="hint">请确保 WPW 已安装并注册了本地服务。</p>
+    </div>
+    
+    <!-- Status: Vault Not Found -->
+    <div id="noVault" class="view hidden">
+      <p class="message">未找到密码库</p>
+      <p class="hint">请在终端运行 <code>wpw init</code> 创建密码库。</p>
+    </div>
+    
+    <!-- Status: Locked -->
+    <div id="locked" class="view hidden">
+      <p class="message">密码库已锁定</p>
+      <form id="unlockForm">
+        <input type="password" id="masterPassword" placeholder="主密码" autocomplete="off" required>
+        <button type="submit" class="primary-btn">解锁</button>
+      </form>
+      <p id="unlockError" class="error hidden"></p>
+    </div>
+    
+    <!-- Status: Unlocked -->
+    <div id="unlocked" class="view hidden">
+      <div id="notification" class="notification hidden"></div>
+      <!-- Save detected credentials -->
+      <div id="savePassword" class="save-section hidden">
+        <div class="save-header">
+          <span class="save-icon">💾</span>
+          <span>保存此密码？</span>
+        </div>
+        <div class="detail-field">
+          <label>网站</label>
+          <div id="saveSite" class="field-value"></div>
+        </div>
+        <div class="detail-field">
+          <label>用户名</label>
+          <div id="saveUsername" class="field-value"></div>
+        </div>
+        <div class="detail-field">
+          <label>密码</label>
+          <div id="savePasswordValue" class="field-value"></div>
+        </div>
+        <div class="save-actions">
+          <button id="saveBtn" class="primary-btn">保存</button>
+          <button id="dismissBtn" class="secondary-btn">忽略</button>
+        </div>
+        <div class="save-divider"></div>
+      </div>
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="搜索密码...">
+      </div>
+      <div id="entriesList" class="entries-list">
+        <!-- Populated dynamically -->
+      </div>
+      <div id="noEntries" class="message hidden">
+        未找到匹配的密码
+      </div>
+    </div>
+    
+    <!-- Entry Detail View -->
+    <div id="entryDetail" class="view hidden">
+      <button id="backBtn" class="icon-btn back">←</button>
+      <h2 id="detailTitle"></h2>
+      <div class="detail-field">
+        <label>用户名</label>
+        <div class="field-value">
+          <span id="detailUsername"></span>
+          <button class="copy-btn" data-field="username" title="复制">📋</button>
+        </div>
+      </div>
+      <div class="detail-field">
+        <label>密码</label>
+        <div class="field-value">
+          <span id="detailPassword">••••••••</span>
+          <button class="copy-btn" data-field="password" title="复制">📋</button>
+          <button id="togglePassword" class="icon-btn" title="显示/隐藏">👁</button>
+        </div>
+      </div>
+      <div class="detail-field" id="totpSection" style="display:none">
+        <label>TOTP</label>
+        <div class="field-value">
+          <span id="detailTotp"></span>
+          <span id="totpTimer" class="timer"></span>
+          <button class="copy-btn" data-field="totp" title="复制">📋</button>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="fillBtn" class="primary-btn">填充</button>
+        <button id="deleteBtn" class="danger-btn">删除此密码</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Confirm Dialog -->
+  <div id="confirmOverlay" class="confirm-overlay hidden">
+    <div class="confirm-dialog">
+      <p id="confirmMessage"></p>
+      <div class="confirm-actions">
+        <button id="confirmCancelBtn" class="secondary-btn">取消</button>
+        <button id="confirmOkBtn" class="danger-btn">确定删除</button>
+      </div>
+    </div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/wpw-core",
+    "crates/wpw-cli",
+    "crates/wpw-host",
+]
+
+[workspace.package]
+version = "1.0.0"
+edition = "2021"
+license = "MIT"
+rust-version = "1.74"
+
+[profile.release]
+lto = true
+strip = true
+opt-level = "z"

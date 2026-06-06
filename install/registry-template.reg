@@ -1,0 +1,7 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CURRENT_USER\SOFTWARE\Google\Chrome\NativeMessagingHosts\com.wpw.host]
+@="MANIFEST_PATH_PLACEHOLDER"
+
+[HKEY_CURRENT_USER\SOFTWARE\Microsoft\Edge\NativeMessagingHosts\com.wpw.host]
+@="MANIFEST_PATH_PLACEHOLDER"

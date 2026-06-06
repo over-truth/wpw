@@ -1,0 +1,9 @@
+{
+  "name": "com.wpw.host",
+  "description": "WPW Password Manager Native Host",
+  "path": "HOST_PATH_PLACEHOLDER",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://EXTENSION_ID_PLACEHOLDER/"
+  ]
+}
