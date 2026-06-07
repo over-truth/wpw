@@ -39,7 +39,7 @@ impl VaultHeader {
         }
 
         let format_version = u16::from_le_bytes([data[4], data[5]]);
-        if format_version > CURRENT_VERSION {
+        if format_version == 0 || format_version > CURRENT_VERSION {
             return Err(HeaderError::UnsupportedVersion(format_version));
         }
 

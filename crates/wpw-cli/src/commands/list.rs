@@ -1,34 +1,21 @@
-use crate::{Cli, session, tty};
-use std::path::PathBuf;
-
-fn default_vault_path() -> PathBuf {
-    #[cfg(target_os = "windows")]
-    { let h = dirs::home_dir().unwrap_or_else(|| PathBuf::from(".")); h.join("Documents").join("wpw").join("vault.wpw") }
-    #[cfg(not(target_os = "windows"))]
-    { let h = dirs::home_dir().unwrap_or_else(|| PathBuf::from(".")); h.join(".local").join("share").join("wpw").join("vault.wpw") }
-}
+use crate::{vault_io, Cli};
 
 pub fn run(cli: &Cli, tag: Option<&str>, url: Option<&str>, format: &str) -> Result<(), Box<dyn std::error::Error>> {
-    let vault_path = cli.vault.as_ref().map(PathBuf::from).unwrap_or_else(default_vault_path);
-    let _enc_key = session::get_encryption_key(300)
-        .ok_or("Vault is locked. Run `wpw unlock` first.")?;
-    let master_password = tty::prompt_password("Enter master password: ")?;
-    let vault_data = wpw_core::vault::open_vault(&vault_path, master_password.as_bytes())?;
-    
-    let entries: Vec<_> = vault_data.entries.iter().filter(|e| {
+    let vault = vault_io::open_with_session(cli)?;
+
+    let entries: Vec<_> = vault.data.entries.iter().filter(|e| {
         if let Some(t) = tag {
             if !e.tags.contains(&t.to_string()) { return false; }
         }
         if let Some(u) = url {
-            if let Some(ref entry_url) = e.url {
-                if !entry_url.contains(u) { return false; }
-            } else {
-                return false;
+            match &e.url {
+                Some(entry_url) if entry_url.contains(u) => {}
+                _ => return false,
             }
         }
         true
     }).collect();
-    
+
     match format {
         "json" => {
             let json_entries: Vec<serde_json::Value> = entries.iter().map(|e| {
@@ -49,7 +36,6 @@ pub fn run(cli: &Cli, tag: Option<&str>, url: Option<&str>, format: &str) -> Res
             }
         }
         _ => {
-            // table format
             if entries.is_empty() {
                 println!("No entries found.");
             } else {
@@ -67,7 +53,7 @@ pub fn run(cli: &Cli, tag: Option<&str>, url: Option<&str>, format: &str) -> Res
             }
         }
     }
-    
+
     Ok(())
 }
 

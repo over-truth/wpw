@@ -16,3 +16,12 @@ Thumbs.db
 *.wpw
 session.key
 session.dat
+
+# Local IDE/Agent config
+.claude/settings.local.json
+
+# CodeGraph tool runtime data
+.codegraph/
+
+# Runtime PID files
+*.pid

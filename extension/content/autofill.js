@@ -212,47 +212,18 @@
 
     if (message.type === 'captureCredentials') {
       const form = findLoginForm();
-      // Debug: check direct lookup
-      const directUsername = document.getElementById('username');
-      const allInputCount = document.querySelectorAll('input').length;
       if (form && form.passwordField && form.passwordField.value) {
         sendResponse({
           found: true,
           username: form.usernameField ? form.usernameField.value : '',
           password: form.passwordField.value,
           title: document.title,
-          _debug: {
-            hasUsernameField: !!form.usernameField,
-            usernameFieldId: form.usernameField ? form.usernameField.id : null,
-            directUsernameVal: directUsername ? directUsername.value : null,
-            allInputCount: allInputCount,
-            formExists: !!form.form,
-          },
         });
       } else {
         sendResponse({ found: false });
       }
     }
   });
-  
-  // Detect form submission to capture credentials
-  document.addEventListener('submit', (e) => {
-    const form = e.target;
-    const passwordInput = form.querySelector('input[type="password"]');
-    if (!passwordInput || !passwordInput.value) return;
-    
-    const usernameInput = findUsernameField(form, passwordInput);
-    
-    chrome.runtime.sendMessage({
-      type: 'credentialsDetected',
-      payload: {
-        username: usernameInput ? usernameInput.value : '',
-        password: passwordInput.value,
-        url: window.location.href,
-        title: document.title,
-      }
-    });
-  }, true);
   
   // Notify background that we detected a login form
   const form = findLoginForm();
@@ -262,4 +233,11 @@
       url: window.location.href
     });
   }
+
+  // NOTE: we intentionally do NOT auto-capture credentials on form submit. Previously this
+  // file sent { username, password } to the background on every `submit` event, regardless of
+  // whether the host was unlocked or the user wanted to save the credential — that turned the
+  // extension into a silent credential collector for every site the user logged in to. Saving a
+  // new credential now requires the user to open the popup and click "Capture", which calls the
+  // `captureCredentials` handler above to read the *currently filled* form fields.
 })();

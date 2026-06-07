@@ -1,4 +1,4 @@
-use zeroize::Zeroize;
+use zeroize::{Zeroize, ZeroizeOnDrop};
 
 use argon2::{Algorithm, Argon2, Params, Version};
 
@@ -20,6 +20,9 @@ impl Default for KdfParams {
     }
 }
 
+/// Argon2id output. Both halves are sensitive — `hmac_key` used to be a bare `[u8; 32]`
+/// with no Drop hook, so it lingered in memory after this struct went out of scope.
+#[derive(ZeroizeOnDrop)]
 pub struct DerivedKeys {
     pub encryption_key: EncryptionKey,
     pub hmac_key: [u8; 32], // reserved for future use

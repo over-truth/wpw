@@ -250,23 +250,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
   
   if (message.type === 'formDetected') {
-    // Content script detected a login form
+    // Content script reports a login form. We only refresh the badge count here so the
+    // user knows credentials are available — we deliberately do NOT auto-fill, even on a
+    // single match, because lax subdomain matching could otherwise leak credentials into
+    // a sibling subdomain. Auto-fill requires an explicit click in the popup.
     if (!locked && sender.tab?.url) {
       queryEntriesForTab(sender.tab.url).then(entries => {
-        if (entries.length === 1) {
-          sendRequest({ type: 'get_entry', payload: { entry_id: entries[0].id } })
-            .then(response => {
-              if (response.success) {
-                chrome.tabs.sendMessage(sender.tab.id, {
-                  type: 'fill',
-                  username: response.payload.username,
-                  password: response.payload.password
-                });
-              }
-            })
-            .catch(() => {});
+        updateBadgeWithCount(entries.length);
+        if (sender.tab.id != null) {
+          chrome.storage.session.set({ [`tab_${sender.tab.id}`]: entries });
         }
-      });
+      }).catch(() => {});
     }
     sendResponse({ success: true });
     return false;

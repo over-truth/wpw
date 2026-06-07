@@ -18,3 +18,4 @@ secrecy = "0.10"
 uuid = "1"
 time = { version = "0.3", features = ["serde"] }
 rand = "0.8"
+psl = "2"

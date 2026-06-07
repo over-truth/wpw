@@ -1,7 +1,9 @@
 mod commands;
+mod paths;
 mod session;
 mod tty;
 mod clipboard;
+mod vault_io;
 
 use clap::{Parser, Subcommand};
 
@@ -66,8 +68,9 @@ enum Commands {
         url: Option<String>,
         #[arg(long)]
         username: Option<String>,
+        /// Read the entry's password from stdin (one line). Avoids exposing it in `ps aux`.
         #[arg(long)]
-        password: Option<String>,
+        password_stdin: bool,
         /// Generate a random password
         #[arg(long)]
         generate: bool,
@@ -112,8 +115,9 @@ enum Commands {
         url: Option<String>,
         #[arg(long)]
         username: Option<String>,
+        /// Read the new password from stdin (one line). Avoids exposing it in `ps aux`.
         #[arg(long)]
-        password: Option<String>,
+        password_stdin: bool,
         #[arg(long)]
         generate: bool,
         #[arg(long)]
@@ -166,6 +170,12 @@ enum Commands {
     History {
         /// Entry ID or title
         id: String,
+        /// Show historical passwords in plaintext
+        #[arg(long)]
+        show: bool,
+        /// Copy the N-th historical password to clipboard (1-indexed)
+        #[arg(long)]
+        copy: Option<usize>,
     },
     /// Restore a password from history
     Restore {
@@ -214,20 +224,20 @@ fn main() {
         Commands::Unlock { timeout, ref vault } => commands::unlock::run(&cli, timeout, vault.as_deref()),
         Commands::Lock => commands::lock::run(&cli),
         Commands::Status => commands::status::run(&cli),
-        Commands::Add { ref title, ref url, ref username, ref password, generate, ref notes, ref tag, ref totp } => {
-            commands::add::run(&cli, title.clone(), url.clone(), username.clone(), password.clone(), generate, notes.clone(), tag.clone(), totp.clone())
+        Commands::Add { ref title, ref url, ref username, password_stdin, generate, ref notes, ref tag, ref totp } => {
+            commands::add::run(&cli, title.clone(), url.clone(), username.clone(), password_stdin, generate, notes.clone(), tag.clone(), totp.clone())
         }
         Commands::Get { ref id, ref field, copy, show } => commands::get::run(&cli, id, field.as_deref(), copy, show),
         Commands::List { ref tag, ref url, ref format } => commands::list::run(&cli, tag.as_deref(), url.as_deref(), format),
-        Commands::Edit { ref id, ref title, ref url, ref username, ref password, generate, ref notes } => {
-            commands::edit::run(&cli, id, title.clone(), url.clone(), username.clone(), password.clone(), generate, notes.clone())
+        Commands::Edit { ref id, ref title, ref url, ref username, password_stdin, generate, ref notes } => {
+            commands::edit::run(&cli, id, title.clone(), url.clone(), username.clone(), password_stdin, generate, notes.clone())
         }
         Commands::Delete { ref id, yes } => commands::delete::run(&cli, id, yes),
         Commands::Generate { length, no_upper, no_lower, no_digits, no_symbols, ref symbols, ref exclude, count, passphrase, words, ref separator, capitalize } => {
             commands::generate::run(length, no_upper, no_lower, no_digits, no_symbols, symbols.clone(), exclude.clone(), count, passphrase, words, separator.chars().next().unwrap_or('-'), capitalize)
         }
         Commands::Totp { ref id, copy } => commands::totp::run(&cli, id, copy),
-        Commands::History { ref id } => commands::history::run(&cli, id),
+        Commands::History { ref id, show, copy } => commands::history::run(&cli, id, show, copy),
         Commands::Restore { ref id, at } => commands::restore::run(&cli, id, at),
         Commands::Export { ref format, ref output, include_history } => commands::export::run(&cli, format, output.as_deref(), include_history),
         Commands::Import { ref format, ref file } => commands::import::run(&cli, format, file),
