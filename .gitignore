@@ -1,0 +1,18 @@
+# Rust build artifacts
+target/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# wpw secrets (vault files & session keys)
+*.wpw
+session.key
+session.dat
